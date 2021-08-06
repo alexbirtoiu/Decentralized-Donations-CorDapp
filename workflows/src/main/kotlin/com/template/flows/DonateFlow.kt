@@ -39,7 +39,6 @@ class DonateFlow(
 
         val causeStateIn = subFlow(ReceiveStateAndRefFlow<Cause>(organizationSession)).single()
 
-
         val causeStateOut = organizationSession.receive(Cause::class.java).unwrap{it}
 
         val iouToken = organizationSession.receive(IOUToken::class.java).unwrap{it}

@@ -6,6 +6,7 @@ import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
 import com.r3.corda.lib.tokens.contracts.utilities.of
+import com.r3.corda.lib.tokens.contracts.utilities.withoutIssuer
 import com.r3.corda.lib.tokens.money.GBP
 import com.r3.corda.lib.tokens.workflows.flows.issue.IssueTokensFlowHandler
 import com.r3.corda.lib.tokens.workflows.flows.rpc.IssueTokens
@@ -35,10 +36,12 @@ import java.util.LinkedHashMap
 class FlowTests {
     lateinit var mockNetwork: MockNetwork
     lateinit var donor: StartedMockNode
+    lateinit var donor2: StartedMockNode
     lateinit var organization: StartedMockNode
     lateinit var bank: StartedMockNode
 
     lateinit var donorParty : Party
+    lateinit var donor2Party : Party
     lateinit var organizationParty : Party
     lateinit var bankParty : Party
 
@@ -50,8 +53,10 @@ class FlowTests {
         donor = mockNetwork.createNode(MockNodeParameters())
         organization = mockNetwork.createNode(MockNodeParameters())
         bank = mockNetwork.createNode(MockNodeParameters())
+        donor2 = mockNetwork.createNode(MockNodeParameters())
 
         donorParty = donor.info.chooseIdentityAndCert().party
+        donor2Party = donor2.info.chooseIdentityAndCert().party
         organizationParty = organization.info.chooseIdentityAndCert().party
         bankParty = bank.info.chooseIdentityAndCert().party
 
@@ -134,7 +139,7 @@ class FlowTests {
     }
 
     @Test
-    fun donateFlow() {
+    fun useCaseTest() {
         val cause = Cause("Project", "description", 200.GBP issuedBy bankParty, 40 of tokenType issuedBy organizationParty, 0.GBP issuedBy bankParty)
         val issueCauseFlow = IssueCauseFlow(cause)
         val future1 = organization.startFlow(issueCauseFlow)
@@ -146,9 +151,41 @@ class FlowTests {
         mockNetwork.runNetwork()
         future2.getOrThrow()
 
-        val donateFlow = DonateFlow(organizationParty, 40.GBP issuedBy bankParty, cause.linearId)
-        val future3 = donor.startFlow(donateFlow)
+        val issueMoneyFlow2 = IssueFungibleTokenFlow(160.GBP, donor2Party)
+        val future3 = bank.startFlow(issueMoneyFlow2)
         mockNetwork.runNetwork()
         future3.getOrThrow()
+
+        val donateFlow = DonateFlow(organizationParty, 40.GBP issuedBy bankParty, cause.linearId)
+        val future4 = donor.startFlow(donateFlow)
+        mockNetwork.runNetwork()
+        val donate1 = future4.getOrThrow()
+        val iou1 = donate1.tx.outputsOfType<IOUToken>().single()
+
+        val donateFlow2 = DonateFlow(organizationParty, 160.GBP issuedBy bankParty, cause.linearId)
+        val future5 = donor2.startFlow(donateFlow2)
+        mockNetwork.runNetwork()
+        val donate2 =future5.getOrThrow()
+        val iou2 = donate2.tx.outputsOfType<IOUToken>().single()
+
+        val settleCauseFlow = SettleCauseFlow(cause.linearId)
+        val future6 = organization.startFlow(settleCauseFlow)
+        mockNetwork.runNetwork()
+        future6.getOrThrow()
+
+        val tokens = 40 of tokenType issuedBy organizationParty
+        val issueTokensForCause = IssueFungibleTokenFlow(tokens.withoutIssuer(), organizationParty)
+        val future7 = organization.startFlow(issueTokensForCause)
+        future7.getOrThrow()
+
+        val settleIouTokenDonor = IOUTokenSettleFlow(iou1.linearId)
+        val future8 = organization.startFlow(settleIouTokenDonor)
+        mockNetwork.runNetwork()
+        future8.getOrThrow()
+
+        val settleIouTokenDonor2 = IOUTokenSettleFlow(iou2.linearId)
+        val future9 = organization.startFlow(settleIouTokenDonor2)
+        mockNetwork.runNetwork()
+        future9.getOrThrow()
     }
 }

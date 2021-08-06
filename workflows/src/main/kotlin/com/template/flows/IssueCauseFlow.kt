@@ -27,6 +27,6 @@ class IssueCauseFlow(
 
         val stx = subFlow(CollectSignaturesFlow(ptx, listOf()))
 
-        return subFlow(FinalityFlow(stx,listOf()))
+        return subFlow(FinalityFlow(stx, listOf()))
     }
 }
