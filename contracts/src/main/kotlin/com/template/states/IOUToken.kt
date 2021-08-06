@@ -16,19 +16,14 @@ class IOUToken(
     val timeWindow : TimeWindow ?= null,
     val amount : Amount<IssuedTokenType>,
     val donated : Amount<IssuedTokenType>,
+    val causeId : UniqueIdentifier,
     override val linearId: UniqueIdentifier = UniqueIdentifier()
-   ) : LinearState, SchedulableState {
+   ) : LinearState {
 
     val borrower = amount.token.issuer
 
     override val participants = listOf(borrower, lender)
 
-    override fun nextScheduledActivity(
-        thisStateRef: StateRef,
-        flowLogicRefFactory: FlowLogicRefFactory
-    ): ScheduledActivity? {
-        TODO("Not yet implemented")
-    }
 }
 
 

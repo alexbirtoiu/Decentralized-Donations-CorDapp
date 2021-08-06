@@ -50,15 +50,15 @@ class IOUMoneyContract : Contract {
                 val iouMoney = inputs.single()
 
                 val currency = iouMoney.amount.token
-                "This currency is not allowed" using (currency in currencies)
+                "This currency is not allowed" using (currency.tokenType in currencies)
 
-                val cashInputs = tx.inputsOfType<FungibleToken>()
-                val validCashInputs = cashInputs.filter{it.amount.token == currency && it.holder == iouMoney.borrower}
-                "All money input states must be valid" using (cashInputs == validCashInputs)
+//                val cashInputs = tx.inputsOfType<FungibleToken>()
+//                val validCashInputs = cashInputs.filter{it.amount.token == currency && it.holder == iouMoney.borrower}
+//                "All money input states must be valid" using (cashInputs == validCashInputs)
 
                 val cashOutputs = tx.outputsOfType<FungibleToken>()
                 val validCashOutputs = cashOutputs.filter{it.amount.token == currency && it.holder == iouMoney.lender}
-                "All money output states must be valid" using (cashOutputs == validCashOutputs)
+                "There must be valid Cash output states" using (validCashOutputs.isNotEmpty())
 
                 val sumCash = validCashOutputs.map{it.amount}.sumOrZero(currency)
                 "Returned amount must be positive" using (sumCash.quantity > 0)
