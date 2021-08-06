@@ -13,7 +13,7 @@ class Cause (
     val description : String,
     val neededAmount : Amount<IssuedTokenType>,
     val totalTokens : Amount<IssuedTokenType>,
-    val gatheredAmount : Amount<IssuedTokenType>,
+    val gatheredAmount : Amount<IssuedTokenType> = Amount(0, neededAmount.token),
     override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : LinearState {
 
@@ -50,6 +50,19 @@ class Cause (
         if (participants != other.participants) return false
 
         return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + description.hashCode()
+        result = 31 * result + neededAmount.hashCode()
+        result = 31 * result + totalTokens.hashCode()
+        result = 31 * result + gatheredAmount.hashCode()
+        result = 31 * result + linearId.hashCode()
+        result = 31 * result + currency.hashCode()
+        result = 31 * result + issuer.hashCode()
+        result = 31 * result + participants.hashCode()
+        return result
     }
 
 }

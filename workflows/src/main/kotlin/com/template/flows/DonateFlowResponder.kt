@@ -36,7 +36,7 @@ class DonateFlowResponder(
 
         subFlow(object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) {
-
+               // Additional sanity checks for donate flows
             }
 
         })

@@ -8,7 +8,7 @@ import net.corda.core.flows.*
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.unwrap
 
-
+@Deprecated("This flow is not currently used")
 @InitiatedBy(RequestDonationFlow::class)
 class RequestDonationResponderFlow(
     val counterpartySession : FlowSession

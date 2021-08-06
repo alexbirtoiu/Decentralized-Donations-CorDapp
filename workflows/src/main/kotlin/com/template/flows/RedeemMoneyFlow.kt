@@ -15,6 +15,7 @@ import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.transactions.SignedTransaction
 
+@Deprecated("This flow is not currently used")
 @InitiatingFlow
 @StartableByRPC
 class RedeemMoneyFlow(

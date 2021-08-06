@@ -13,7 +13,7 @@ class SettleCauseResponderFlow(
     override fun call(): SignedTransaction {
         subFlow(object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) {
-
+               // Additional sanity checks for SettleCause flows
             }
         })
 

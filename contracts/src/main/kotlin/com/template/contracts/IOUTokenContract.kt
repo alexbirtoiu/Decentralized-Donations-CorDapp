@@ -5,15 +5,12 @@ import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.template.states.Cause
 import com.template.states.IOUMoney
 import com.template.states.IOUToken
-import com.template.states.TokenAsset
 import net.corda.core.contracts.Amount.Companion.sumOrZero
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
 import net.corda.core.contracts.requireSingleCommand
 import net.corda.core.transactions.LedgerTransaction
 import net.corda.core.contracts.requireThat
-import sun.rmi.runtime.Log
-import java.util.*
 
 class IOUTokenContract : Contract {
 

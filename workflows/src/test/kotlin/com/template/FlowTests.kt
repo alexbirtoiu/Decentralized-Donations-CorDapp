@@ -125,7 +125,7 @@ class FlowTests {
         val flow = RequestDonationFlow(10.GBP issuedBy bankParty, donorParty, iouToken)
         val future = organization.startFlow(flow)
         mockNetwork.runNetwork()
-        val ptx = future.getOrThrow()
+        future.getOrThrow()
 
     }
 
@@ -140,22 +140,25 @@ class FlowTests {
 
     @Test
     fun useCaseTest() {
-        val cause = Cause("Project", "description", 200.GBP issuedBy bankParty, 40 of tokenType issuedBy organizationParty, 0.GBP issuedBy bankParty)
+        // Creating the Cause
+        val cause = Cause("Project", "description", 200.GBP issuedBy bankParty, 40 of tokenType issuedBy organizationParty)
         val issueCauseFlow = IssueCauseFlow(cause)
         val future1 = organization.startFlow(issueCauseFlow)
         mockNetwork.runNetwork()
         future1.getOrThrow()
 
-        val issueMoneyFlow = IssueFungibleTokenFlow(40.GBP, donorParty)
+        // Issuing Money for the 2 donors
+        val issueMoneyFlow = IssueFungibleTokenFlow(500.GBP, donorParty)
         val future2 = bank.startFlow(issueMoneyFlow)
         mockNetwork.runNetwork()
         future2.getOrThrow()
 
-        val issueMoneyFlow2 = IssueFungibleTokenFlow(160.GBP, donor2Party)
+        val issueMoneyFlow2 = IssueFungibleTokenFlow(500.GBP, donor2Party)
         val future3 = bank.startFlow(issueMoneyFlow2)
         mockNetwork.runNetwork()
         future3.getOrThrow()
 
+        // Donating both amounts to the organization
         val donateFlow = DonateFlow(organizationParty, 40.GBP issuedBy bankParty, cause.linearId)
         val future4 = donor.startFlow(donateFlow)
         mockNetwork.runNetwork()
@@ -168,16 +171,19 @@ class FlowTests {
         val donate2 =future5.getOrThrow()
         val iou2 = donate2.tx.outputsOfType<IOUToken>().single()
 
+        // The organization settles the cause and redeems the money from the ledger
         val settleCauseFlow = SettleCauseFlow(cause.linearId)
         val future6 = organization.startFlow(settleCauseFlow)
         mockNetwork.runNetwork()
         future6.getOrThrow()
 
+        // The organization creates
         val tokens = 40 of tokenType issuedBy organizationParty
         val issueTokensForCause = IssueFungibleTokenFlow(tokens.withoutIssuer(), organizationParty)
         val future7 = organization.startFlow(issueTokensForCause)
         future7.getOrThrow()
 
+        // Settle both of the IOUs created by the two donating flows
         val settleIouTokenDonor = IOUTokenSettleFlow(iou1.linearId)
         val future8 = organization.startFlow(settleIouTokenDonor)
         mockNetwork.runNetwork()

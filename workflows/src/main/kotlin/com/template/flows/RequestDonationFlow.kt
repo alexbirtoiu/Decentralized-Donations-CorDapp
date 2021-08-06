@@ -20,7 +20,7 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.unwrap
 
-
+@Deprecated("This flow is not currently used")
 @InitiatingFlow
 @StartableByRPC
 class RequestDonationFlow(
