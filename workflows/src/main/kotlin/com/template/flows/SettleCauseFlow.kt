@@ -30,7 +30,6 @@ class SettleCauseFlow(
             .addInputState(causeStateIn)
             .addCommand(CauseContract.Commands.Settle(), listOf(ourIdentity.owningKey))
 
-
         val amount = causeStateIn.state.data.neededAmount
         val cashInputs = DatabaseTokenSelection(serviceHub)
             .selectTokens(ourIdentity.owningKey, amount.withoutIssuer())

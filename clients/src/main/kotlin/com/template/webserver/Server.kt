@@ -4,6 +4,11 @@ import org.springframework.boot.Banner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.WebApplicationType.SERVLET
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.context.annotation.Bean
+import org.springframework.web.servlet.config.annotation.CorsRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
+
 
 /**
  * Our Spring Boot application.
@@ -20,3 +25,11 @@ fun main(args: Array<String>) {
     app.webApplicationType = SERVLET
     app.run(*args)
 }
+//@Bean
+//fun corsConfigurer() : WebMvcConfigurer {
+//    return object : WebMvcConfigurer  {
+//        override fun addCorsMappings(registry: CorsRegistry) {
+//            registry.addMapping("/party").allowedOrigins("http://localhost:3000")
+//        }
+//    }
+//}

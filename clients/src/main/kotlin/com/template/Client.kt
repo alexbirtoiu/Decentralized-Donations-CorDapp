@@ -1,6 +1,9 @@
 package com.template
 
+import com.r3.corda.lib.tokens.money.GBP
+import com.template.flows.IssueFungibleTokenFlow
 import net.corda.client.rpc.CordaRPCClient
+import net.corda.core.messaging.startFlow
 import net.corda.core.utilities.NetworkHostAndPort.Companion.parse
 import net.corda.core.utilities.loggerFor
 
@@ -26,18 +29,11 @@ private class Client {
         val clientConnection = client.start(rpcUsername, rpcPassword)
         val proxy = clientConnection.proxy
 
-        // Interact with the node.
-        // Example #1, here we print the nodes on the network.
-        val nodes = proxy.networkMapSnapshot()
-        println("\n-- Here is the networkMap snapshot --")
-        logger.info("{}", nodes)
-
-        // Example #2, here we print the PartyA's node info
-        val me = proxy.nodeInfo().legalIdentities.first().name
-        println("\n-- Here is the node info of the node that the client connected to --")
-        logger.info("{}", me)
-
-        //Close the client connection
+        proxy.startFlowDynamic(
+            IssueFungibleTokenFlow::class.java,
+            100.GBP,
+            proxy.nodeInfo().legalIdentities.first()
+        )
         clientConnection.close()
     }
 }

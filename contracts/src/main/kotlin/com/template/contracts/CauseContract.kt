@@ -49,6 +49,15 @@ class CauseContract : Contract {
                 "There must be only one output Cause state" using (outputs.size == 1)
                 val outputCause = outputs.single()
 
+                val timeWindow = tx.timeWindow
+
+                if (timeWindow != null) {
+                    "The donation must be made before the timeLimit" using
+                            (inputCause.timeLimit.isAfter(timeWindow.untilTime))
+                } else {
+                    "TIme window must be present in the transaction" using (false)
+                }
+
                 val currency = inputCause.currency
 
                 val cashOutputs = tx.outputsOfType<FungibleToken>()

@@ -13,6 +13,7 @@ import com.r3.corda.lib.tokens.workflows.flows.rpc.IssueTokens
 import com.r3.corda.lib.tokens.workflows.flows.rpc.IssueTokensHandler
 import com.template.flows.*
 import com.template.states.Cause
+import com.template.states.IOUMoney
 import com.template.states.IOUToken
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.StateRef
@@ -29,6 +30,8 @@ import net.corda.testing.node.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import java.lang.Thread.sleep
+import java.time.Duration
 import java.time.Instant
 import java.util.LinkedHashMap
 
@@ -88,50 +91,51 @@ class FlowTests {
         assert (money.issuer == bankParty)
     }
 
-    @Test
-    fun redeemMoneyTest() {
-        val issueFlow = IssueFungibleTokenFlow(10.GBP, donorParty)
-        val future1 = bank.startFlow(issueFlow)
-        mockNetwork.runNetwork()
+//    @Test
+//    fun redeemMoneyTest() {
+//        val issueFlow = IssueFungibleTokenFlow(10.GBP, donorParty)
+//        val future1 = bank.startFlow(issueFlow)
+//        mockNetwork.runNetwork()
+//
+//        val stx = future1.getOrThrow()
+//        val redeemFlow = RedeemMoneyFlow(5.GBP issuedBy bankParty)
+//        val future2 = donor.startFlow(redeemFlow)
+//        mockNetwork.runNetwork()
+//
+//        val ptx = future2.getOrThrow()
+//
+//        assert (ptx.tx.inputs.size == 1)
+//        assert (ptx.tx.outputs.size == 1)
+//
+//        val moneyOut = ptx.tx.outputs.single().data as FungibleToken
+//
+//        assert (ptx.tx.inputs.single() == StateRef(stx.id, 0) )
+//
+//        assert (moneyOut.tokenType.tokenIdentifier == "GBP")
+//        assert (moneyOut.amount.quantity == 500L)
+//        assert (moneyOut.holder == donorParty)
+//        assert (moneyOut.issuer == bankParty)
+//    }
 
-        val stx = future1.getOrThrow()
-        val redeemFlow = RedeemMoneyFlow(5.GBP issuedBy bankParty)
-        val future2 = donor.startFlow(redeemFlow)
-        mockNetwork.runNetwork()
-
-        val ptx = future2.getOrThrow()
-
-        assert (ptx.tx.inputs.size == 1)
-        assert (ptx.tx.outputs.size == 1)
-
-        val moneyOut = ptx.tx.outputs.single().data as FungibleToken
-
-        assert (ptx.tx.inputs.single() == StateRef(stx.id, 0) )
-
-        assert (moneyOut.tokenType.tokenIdentifier == "GBP")
-        assert (moneyOut.amount.quantity == 500L)
-        assert (moneyOut.holder == donorParty)
-        assert (moneyOut.issuer == bankParty)
-    }
-
-    @Test
-    fun requestDonationFlow() {
-        val issueFlow = IssueFungibleTokenFlow(10.GBP, donorParty)
-        val future1 = bank.startFlow(issueFlow)
-        mockNetwork.runNetwork()
-        future1.getOrThrow()
-
-        val iouToken = IOUToken(donorParty, null, 5 of tokenType issuedBy organizationParty, 10.GBP issuedBy bankParty, UniqueIdentifier())
-        val flow = RequestDonationFlow(10.GBP issuedBy bankParty, donorParty, iouToken)
-        val future = organization.startFlow(flow)
-        mockNetwork.runNetwork()
-        future.getOrThrow()
-
-    }
+//    @Test
+//    fun requestDonationFlow() {
+//        val issueFlow = IssueFungibleTokenFlow(10.GBP, donorParty)
+//        val future1 = bank.startFlow(issueFlow)
+//        mockNetwork.runNetwork()
+//        future1.getOrThrow()
+//
+//        val iouToken = IOUToken(donorParty, null, 5 of tokenType issuedBy organizationParty, 10.GBP issuedBy bankParty, UniqueIdentifier())
+//        val flow = RequestDonationFlow(10.GBP issuedBy bankParty, donorParty, iouToken)
+//        val future = organization.startFlow(flow)
+//        mockNetwork.runNetwork()
+//        future.getOrThrow()
+//
+//    }
 
     @Test
     fun issueCauseFlow() {
-        val cause = Cause("Project", "description", 200.GBP issuedBy bankParty, 40 of tokenType issuedBy organizationParty, 0.GBP issuedBy bankParty)
+        val cause = Cause("Project", "description", 200.GBP issuedBy bankParty, 40 of tokenType issuedBy organizationParty,  Instant.now().plus(
+            Duration.ofDays(7)), Duration.ofMinutes(5))
         val issueCauseFlow = IssueCauseFlow(cause)
         val future1 = organization.startFlow(issueCauseFlow)
         mockNetwork.runNetwork()
@@ -141,7 +145,7 @@ class FlowTests {
     @Test
     fun useCaseTest() {
         // Creating the Cause
-        val cause = Cause("Project", "description", 200.GBP issuedBy bankParty, 40 of tokenType issuedBy organizationParty)
+        val cause = Cause("Project", "description", 200.GBP issuedBy bankParty, 40 of tokenType issuedBy organizationParty, Instant.now().plus(Duration.ofSeconds(10)), Duration.ofSeconds(0))
         val issueCauseFlow = IssueCauseFlow(cause)
         val future1 = organization.startFlow(issueCauseFlow)
         mockNetwork.runNetwork()
@@ -189,9 +193,27 @@ class FlowTests {
         mockNetwork.runNetwork()
         future8.getOrThrow()
 
-        val settleIouTokenDonor2 = IOUTokenSettleFlow(iou2.linearId)
-        val future9 = organization.startFlow(settleIouTokenDonor2)
+        sleep(10000)
+
+//        val settleIouTokenDonor2 = IOUTokenSettleFlow(iou2.linearId)
+//        val future9 = organization.startFlow(settleIouTokenDonor2)
+//        mockNetwork.runNetwork()
+//        future9.getOrThrow()
+
+        val issueIOUMoney = IOUMoneyIssueFlow(iou2.linearId)
+        val future10 = donor2.startFlow(issueIOUMoney)
         mockNetwork.runNetwork()
-        future9.getOrThrow()
+        val obligate = future10.getOrThrow()
+        val iouMoney = obligate.tx.outputsOfType<IOUMoney>().single()
+
+        val issueMoneyOrganization = IssueFungibleTokenFlow(500.GBP, organizationParty)
+        val future11 = bank.startFlow(issueMoneyOrganization)
+        mockNetwork.runNetwork()
+        future11.getOrThrow()
+
+        val returnMoney = IOUMoneySettleFlow(iouMoney.linearId)
+        val future12 = organization.startFlow(returnMoney)
+        mockNetwork.runNetwork()
+        future12.getOrThrow()
     }
 }

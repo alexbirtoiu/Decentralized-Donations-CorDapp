@@ -4,9 +4,8 @@ import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.utilities.withoutIssuer
 import com.r3.corda.lib.tokens.selection.database.selector.DatabaseTokenSelection
 import com.r3.corda.lib.tokens.workflows.flows.move.addMoveTokens
-import com.template.contracts.IOUTokenContract
-import com.template.states.Cause
-import com.template.states.IOUToken
+import com.template.contracts.IOUMoneyContract
+import com.template.states.IOUMoney
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
 import net.corda.core.node.services.vault.QueryCriteria
@@ -15,8 +14,8 @@ import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
 @StartableByRPC
-class IOUTokenSettleFlow(
-    val iouId : UniqueIdentifier
+class IOUMoneySettleFlow(
+    val iouId :UniqueIdentifier
 ) : FlowLogic<SignedTransaction>() {
 
     @Suspendable
@@ -24,25 +23,25 @@ class IOUTokenSettleFlow(
         val notary = serviceHub.networkMapCache.notaryIdentities[0]
 
         val criteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(iouId))
-        val iouTokenAndRef = serviceHub.vaultService.queryBy(IOUToken::class.java, criteria).states.single()
-        val iouToken = iouTokenAndRef.state.data
+        val iouMoneyAndRef = serviceHub.vaultService.queryBy(IOUMoney::class.java, criteria).states.single()
+        val iouMoney = iouMoneyAndRef.state.data
 
-        if(iouToken.borrower != ourIdentity) {
-            throw FlowException("Only the borrower can settle an IOUToken")
+        if(iouMoney.borrower != ourIdentity) {
+            throw FlowException("Only the borrower can settle an IOUMoney")
         }
 
         val txBuilder = TransactionBuilder(notary)
-            .addInputState(iouTokenAndRef)
-            .addCommand(IOUTokenContract.Commands.Settle(), iouToken.participants.map{it.owningKey})
+            .addInputState(iouMoneyAndRef)
+            .addCommand(IOUMoneyContract.Commands.Settle(), iouMoney.participants.map{it.owningKey})
 
         val cashInputsOutputs = DatabaseTokenSelection(serviceHub)
-            .generateMove(listOf(Pair(iouToken.lender, iouToken.amount.withoutIssuer())), ourIdentity)
+            .generateMove(listOf(Pair(iouMoney.lender, iouMoney.amount.withoutIssuer())), ourIdentity)
 
         addMoveTokens(txBuilder, cashInputsOutputs.first, cashInputsOutputs.second)
 
         txBuilder.verify(serviceHub)
 
-        val donorSession = initiateFlow(iouToken.lender)
+        val donorSession = initiateFlow(iouMoney.lender)
 
         val ptx = serviceHub.signInitialTransaction(txBuilder)
 

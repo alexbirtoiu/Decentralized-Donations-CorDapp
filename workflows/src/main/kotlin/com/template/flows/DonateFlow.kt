@@ -10,6 +10,7 @@ import com.template.contracts.IOUTokenContract
 import com.template.states.Cause
 import com.template.states.IOUToken
 import net.corda.core.contracts.Amount
+import net.corda.core.contracts.TimeWindow
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
 import net.corda.core.identity.AbstractParty
@@ -17,6 +18,7 @@ import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.unwrap
+import java.time.Duration
 import sun.awt.CausedFocusEvent
 
 @InitiatingFlow
@@ -43,16 +45,18 @@ class DonateFlow(
 
         val iouToken = organizationSession.receive(IOUToken::class.java).unwrap{it}
 
+        val timeWindow = TimeWindow.untilOnly(causeStateIn.state.data.timeLimit.minus(Duration.ofSeconds(1)))
+
         val txBuilder = TransactionBuilder(notary)
             .addInputState(causeStateIn)
             .addOutputState(causeStateOut, CauseContract.ID)
             .addOutputState(iouToken, IOUTokenContract.ID)
             .addCommand(CauseContract.Commands.Donate(), causeStateOut.participants.map{it.owningKey})
             .addCommand(IOUTokenContract.Commands.Donate(), iouToken.participants.map{it.owningKey})
+            .setTimeWindow(timeWindow)
 
         val cashInputsOutputs = DatabaseTokenSelection(serviceHub)
             .generateMove(listOf(Pair(organization, amount.withoutIssuer())), ourIdentity)
-
 
         addMoveTokens(txBuilder, cashInputsOutputs.first, cashInputsOutputs.second)
 

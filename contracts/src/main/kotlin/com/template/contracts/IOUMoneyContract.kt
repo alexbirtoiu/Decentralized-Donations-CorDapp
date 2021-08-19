@@ -28,13 +28,19 @@ class IOUMoneyContract : Contract {
                 val iouMoney = outputs.single()
                 "The amount on the IOUMoney must be positive" using (iouMoney.amount.quantity > 0)
 
-
                 val iouTokenInputs = tx.inputsOfType<IOUToken>()
                 "There must be exactly one IOUToken input state" using (iouTokenInputs.size == 1)
                 val iouToken = iouTokenInputs.single()
 
+                val timeWindow = tx.timeWindow
 
-                "The lender and the borrower must be two different parties" using(iouMoney.lender != iouMoney.borrower)
+                if (timeWindow != null) {
+                    "The expiration on the iouToken must be before the timeWindow of the transaction" using
+                            (iouToken.expirationDate.isBefore(timeWindow.fromTime))
+                } else {
+                    "TIme window must be present in the transaction" using (false)
+                }
+
                 "The same amount of money donated must be returned to the donor" using (iouToken.donated == iouMoney.amount)
 
                 "The lender on the both of the IOUs must be the same" using (iouToken.lender == iouMoney.lender)
@@ -51,10 +57,6 @@ class IOUMoneyContract : Contract {
 
                 val currency = iouMoney.amount.token
                 "This currency is not allowed" using (currency.tokenType in currencies)
-
-//                val cashInputs = tx.inputsOfType<FungibleToken>()
-//                val validCashInputs = cashInputs.filter{it.amount.token == currency && it.holder == iouMoney.borrower}
-//                "All money input states must be valid" using (cashInputs == validCashInputs)
 
                 val cashOutputs = tx.outputsOfType<FungibleToken>()
                 val validCashOutputs = cashOutputs.filter{it.amount.token == currency && it.holder == iouMoney.lender}

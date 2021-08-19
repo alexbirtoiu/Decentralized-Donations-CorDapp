@@ -36,6 +36,9 @@ class IOUTokenContract : Contract {
                 val cause = causeOutputs.single()
                 "The cause ID must match the IOUToken's cause id" using (cause.linearId == iouToken.causeId)
 
+                "The expiration date on the iouToken must match the cause's timeLimit + tokenLimit" using
+                        (iouToken.expirationDate == cause.timeLimit.plus(cause.tokenLimit))
+
                 val currency = iouToken.donated.token
                 "This currency is not allowed" using (currency.tokenType in currencies)
 
@@ -82,13 +85,19 @@ class IOUTokenContract : Contract {
                 val iouMoney = outputs.single()
                 "The amount on the IOUMoney must be positive" using (iouMoney.amount.quantity > 0)
 
-
                 val iouTokenInputs = tx.inputsOfType<IOUToken>()
                 "There must be exactly one IOUToken input state" using (iouTokenInputs.size == 1)
                 val iouToken = iouTokenInputs.single()
 
+                val timeWindow = tx.timeWindow
 
-                "The lender and the borrower must be two different parties" using(iouMoney.lender != iouMoney.borrower)
+                if (timeWindow != null) {
+                    "The expiration on the iouToken must be before the timeWindow of the transaction" using
+                            (iouToken.expirationDate.isBefore(timeWindow.fromTime))
+                } else {
+                    "TIme window must be present in the transaction" using (false)
+                }
+
                 "The same amount of money donated must be returned to the donor" using (iouToken.donated == iouMoney.amount)
 
                 "The lender on the both of the IOUs must be the same" using (iouToken.lender == iouMoney.lender)

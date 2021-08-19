@@ -1,0 +1,14 @@
+partyA:
+  host: localhost:10006
+
+partyB:
+  host: localhost:10009
+
+partyC:
+  host: localhost:10012
+
+bank:
+  host: localhost:10015
+
+server.port: 8085
+

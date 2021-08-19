@@ -121,6 +121,13 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         }
         cordapp project(':contracts')
         cordapp project(':workflows')
+
+        cordapp "$tokens_release_group:tokens-contracts:$tokens_release_version"
+        cordapp "$tokens_release_group:tokens-money:$tokens_release_version"
+
+        cordapp "$tokens_release_group:tokens-workflows:$tokens_release_version"
+        cordapp "$tokens_release_group:tokens-selection:$tokens_release_version"
+        cordapp "$confidential_id_release_group:ci-workflows:$confidential_id_release_version"
         runSchemaMigration = true //This configuration is for any CorDapps with custom schema, We will leave this as true to avoid
         //problems for developers who are not familiar with Corda. If you are not using custom schemas, you can change
         //it to false for quicker project compiling time.
@@ -141,7 +148,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
             address("localhost:10006")
             adminAddress("localhost:10046")
         }
-        rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
+        rpcUsers = [[ user: "partya", "password": "test", "permissions": ["ALL"]]]
     }
     node {
         name "O=PartyB,L=New York,C=US"
@@ -150,7 +157,25 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
             address("localhost:10009")
             adminAddress("localhost:10049")
         }
-        rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
+        rpcUsers = [[ user: "partyb", "password": "test", "permissions": ["ALL"]]]
+    }
+    node {
+        name "O=PartyC,L=London,C=GB"
+        p2pPort 10011
+        rpcSettings {
+            address("localhost:10012")
+            adminAddress("localhost:10052")
+        }
+        rpcUsers = [[ user: "partyc", "password": "test", "permissions": ["ALL"]]]
+    }
+    node {
+        name "O=Bank,L=London,C=GB"
+        p2pPort 10014
+        rpcSettings {
+            address("localhost:10015")
+            adminAddress("localhost:10055")
+        }
+        rpcUsers = [[ user: "bank", "password": "1234", "permissions": ["ALL"]]]
     }
 
 }

@@ -7,13 +7,14 @@ import net.corda.core.contracts.*
 import net.corda.core.flows.FlowLogicRefFactory
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
+import java.time.Instant
 import java.util.*
 
 
 @BelongsToContract(IOUTokenContract::class)
 class IOUToken(
     val lender : Party,
-    val timeWindow : TimeWindow ?= null,
+    val expirationDate : Instant,
     val amount : Amount<IssuedTokenType>,
     val donated : Amount<IssuedTokenType>,
     val causeId : UniqueIdentifier,

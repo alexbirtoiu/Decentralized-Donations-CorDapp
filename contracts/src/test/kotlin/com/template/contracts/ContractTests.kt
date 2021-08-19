@@ -40,7 +40,7 @@ class ContractTests {
         val movedCash = cash.withNewHolder(organization.party)
         val cash2 = 5.GBP issuedBy bank.party heldBy organization.party
         val cash3 = 5.USD issuedBy bank.party heldBy donor.party
-        val movedCash2 = cash2.withNewHolder(organization.party)
+        //val movedCash2 = cash2.withNewHolder(organization.party)
         DigitalCurrency
 
 
