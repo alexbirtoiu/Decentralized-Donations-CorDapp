@@ -105,9 +105,6 @@ class Controller(rpc: NodeRPCConnection) {
     private fun toShow(x : Long)
         =   x.toDouble() / 100
 
-    private fun trimDate(s : String)
-        =   s.substring(0,s.length - 4)
-
     private fun getGroups(type : String): Map<UniqueIdentifier, List<IOUToken>> {
         val (iouTokens, update) = proxy.vaultTrack(IOUToken::class.java)
 
@@ -118,7 +115,6 @@ class Controller(rpc: NodeRPCConnection) {
                         it.lender == myParty() }
             .groupBy { it.causeId }
     }
-
 
     private fun causesToJson(causes : List<Cause>) : MutableList<JsonObject> {
         val res : MutableList<JsonObject> = mutableListOf()
@@ -269,6 +265,8 @@ class Controller(rpc: NodeRPCConnection) {
         return ResponseEntity.ok(json.toString())
     }
 
+    // Get Mappings
+
     @GetMapping(value = ["/owedtokens"], produces = [ APPLICATION_JSON_VALUE ])
     private fun owedTokens() : ResponseEntity<String> {
         val groups = getGroups("owed")
@@ -317,6 +315,8 @@ class Controller(rpc: NodeRPCConnection) {
 
         return ResponseEntity.ok(tokensToJson(rewardTokens))
     }
+
+    // POST Mappings
 
     @RequestMapping(value = ["/party"])
     private fun getParty(@RequestBody payload: String?): ResponseEntity<String> {
