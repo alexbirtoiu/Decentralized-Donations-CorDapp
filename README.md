@@ -36,7 +36,7 @@ To run the Backend Server use the following command in the main directory:
 ./gradlew runBackendServer
 ```
 
-The Backend Server is configured on the port [localhost:10056](http://localhost:10056). You can find the configuration of the Spring Boot server in `clients/src/main/build.gradle`.
+The Backend Server is configured on the port [localhost:10050](http://localhost:10050). You can find the configuration of the Spring Boot server in `clients/src/main/build.gradle`.
 
 ## Running the Frontend React App
 
