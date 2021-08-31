@@ -1,11 +1,15 @@
 package com.template.webserver
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import net.corda.client.jackson.JacksonSupport
 import net.corda.client.rpc.CordaRPCClient
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.utilities.NetworkHostAndPort
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
@@ -41,6 +45,15 @@ open class AppConfig : WebMvcConfigurer {
     open fun bankProxy(): CordaRPCOps {
         val bankClient = CordaRPCClient(NetworkHostAndPort.parse(bankHostAndPort))
         return bankClient.start("bank", "1234").proxy
+    }
+
+    @Bean
+    open fun mappingJackson2HttpMessageConverter(): MappingJackson2HttpMessageConverter {
+        val mapper = JacksonSupport.createDefaultMapper(partyAProxy())
+        mapper.registerModule(KotlinModule())
+        val converter = MappingJackson2HttpMessageConverter()
+        converter.objectMapper = mapper
+        return converter
     }
 
 }

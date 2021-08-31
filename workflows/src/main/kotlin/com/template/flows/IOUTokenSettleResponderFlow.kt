@@ -13,8 +13,7 @@ class IOUTokenSettleResponderFlow(
     override fun call(): SignedTransaction {
         subFlow(object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) {
-                // Check the attachments added to the transaction correspond to the cause
-                // Additional sanity checks for IOUTokenSettle flows
+
             }
         })
 

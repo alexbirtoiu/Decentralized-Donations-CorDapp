@@ -3,6 +3,7 @@ package com.template.flows
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.types.IssuedTokenType
 import com.r3.corda.lib.tokens.contracts.utilities.withoutIssuer
+import com.r3.corda.lib.tokens.selection.TokenQueryBy
 import com.r3.corda.lib.tokens.selection.database.selector.DatabaseTokenSelection
 import com.r3.corda.lib.tokens.workflows.flows.move.addMoveTokens
 import com.template.contracts.CauseContract
@@ -56,7 +57,7 @@ class DonateFlow(
             .setTimeWindow(timeWindow)
 
         val cashInputsOutputs = DatabaseTokenSelection(serviceHub)
-            .generateMove(listOf(Pair(organization, amount.withoutIssuer())), ourIdentity)
+            .generateMove(listOf(Pair(organization, amount.withoutIssuer())), ourIdentity, TokenQueryBy(amount.token.issuer))
 
         addMoveTokens(txBuilder, cashInputsOutputs.first, cashInputsOutputs.second)
 

@@ -3,7 +3,9 @@ package com.template.flows
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.commands.RedeemTokenCommand
 import com.r3.corda.lib.tokens.contracts.utilities.withoutIssuer
+import com.r3.corda.lib.tokens.selection.TokenQueryBy
 import com.r3.corda.lib.tokens.selection.database.selector.DatabaseTokenSelection
+import com.r3.corda.lib.tokens.workflows.flows.redeem.addFungibleTokensToRedeem
 import com.r3.corda.lib.tokens.workflows.flows.redeem.addTokensToRedeem
 import com.template.contracts.CauseContract
 import com.template.states.Cause
@@ -31,10 +33,8 @@ class SettleCauseFlow(
             .addCommand(CauseContract.Commands.Settle(), listOf(ourIdentity.owningKey))
 
         val amount = causeStateIn.state.data.neededAmount
-        val cashInputs = DatabaseTokenSelection(serviceHub)
-            .selectTokens(ourIdentity.owningKey, amount.withoutIssuer())
 
-        addTokensToRedeem(txBuilder, cashInputs)
+        addFungibleTokensToRedeem(txBuilder, serviceHub, amount.withoutIssuer(), amount.token.issuer, ourIdentity)
 
         txBuilder.verify(serviceHub)
 

@@ -5,6 +5,7 @@ import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.template.states.Cause
 import com.template.states.IOUMoney
 import com.template.states.IOUToken
+import com.template.states.RewardToken
 import net.corda.core.contracts.Amount.Companion.sumOrZero
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
@@ -68,9 +69,11 @@ class IOUTokenContract : Contract {
 //                val validInputTokens = inputTokens.filter{it.amount.token == expectedToken && it.holder == iouToken.borrower}
 //                "All token input states must be valid" using (inputTokens == validInputTokens)
 
-                val outputTokens = tx.outputsOfType<FungibleToken>()
+                val outputTokens = tx.outputsOfType<RewardToken>()
                 val validOutputTokens = outputTokens.filter{it.amount.token == expectedToken && it.holder == iouToken.lender}
                 "There must be valid output Tokens" using (validOutputTokens.isNotEmpty())
+
+                //"All tokens must have at least one attachment" using(validOutputTokens.all{it.proof.isNotEmpty()})
 
                 val sumTokens = validOutputTokens.map{it.amount}.sumOrZero(expectedToken)
                 "The amount of tokens should be the same" using (iouToken.amount == sumTokens)

@@ -24,6 +24,8 @@ import net.corda.testing.core.TestIdentity
 import net.corda.testing.node.MockServices
 import net.corda.testing.node.ledger
 import org.junit.Test
+import java.time.Duration
+import java.time.Instant
 
 
 class ContractTests {
@@ -32,7 +34,8 @@ class ContractTests {
     var organization = TestIdentity(CordaX500Name("Bob", "TestLand", "US"))
     var bank = TestIdentity(CordaX500Name("Bank", "TestLand", "US"))
     private val tokenType = TokenType("proj", 0)
-    val cause = Cause("Project", "description", 200.GBP issuedBy bank.party, 40 of tokenType issuedBy organization.party, 0.GBP issuedBy bank.party)
+    val cause = Cause("Project", "description", 200.GBP issuedBy bank.party, 40 of tokenType issuedBy organization.party,  Instant.now().plus(
+        Duration.ofDays(7)), Duration.ofMinutes(5))
 
     @Test
     fun moneyTests() {
@@ -105,32 +108,34 @@ class ContractTests {
     @Test
     fun iouTokenTests() {
         val iouToken = cause.getIOUToken(donor.party, 35.GBP issuedBy bank.party)//IOUToken(donor.party, null, 5 of tokenType issuedBy organization.party, 10.GBP issuedBy bank.party, UniqueIdentifier())
-
         println(iouToken.amount.quantity)
         val cash1 = 32.GBP issuedBy bank.party heldBy donor.party
         val cash2 = 3.GBP issuedBy bank.party heldBy donor.party
         val movedCash1 = cash1.withNewHolder(organization.party)
         val movedCash2 = cash2.withNewHolder(organization.party)
 
-        val token1 = 3 of tokenType issuedBy organization.party heldBy organization.party
-        val token2 = 4 of tokenType issuedBy organization.party heldBy organization.party
+        val token1 = RewardToken(listOf(), 3 of tokenType issuedBy organization.party heldBy organization.party)
+        val token2 = RewardToken(listOf(), 4 of tokenType issuedBy organization.party heldBy organization.party)
         val movedToken1 = token1.withNewHolder(donor.party)
         val movedToken2 = token2.withNewHolder(donor.party)
 
         // Donate
 
-        ledgerServices.ledger {
-            transaction {
-                input(FungibleTokenContract.contractId, cash1)
-                input(FungibleTokenContract.contractId, cash2)
-                output(FungibleTokenContract.contractId, movedCash1)
-                output(FungibleTokenContract.contractId, movedCash2)
-                output(IOUTokenContract.ID, iouToken)
-                command(listOf(donor.party.owningKey, organization.party.owningKey), IOUTokenContract.Commands.Donate())
-                command(listOf(donor.party.owningKey, organization.party.owningKey), MoveTokenCommand(GBP issuedBy bank.party, listOf(0,1), listOf(0,1)))
-                verifies()
-            }
-        }
+//        ledgerServices.ledger {
+//            transaction {
+//                input(CauseContract.ID, cause)
+//                output(CauseContract.ID, cause.receive(cash1.amount).receive(cash2.amount))
+//                input(FungibleTokenContract.contractId, cash1)
+//                input(FungibleTokenContract.contractId, cash2)
+//                output(FungibleTokenContract.contractId, movedCash1)
+//                output(FungibleTokenContract.contractId, movedCash2)
+//                output(IOUTokenContract.ID, iouToken)
+//                command(listOf(organization.party.owningKey))
+//                command(listOf(donor.party.owningKey, organization.party.owningKey), IOUTokenContract.Commands.Donate())
+//                command(listOf(donor.party.owningKey, organization.party.owningKey), MoveTokenCommand(GBP issuedBy bank.party, listOf(0,1), listOf(0,1)))
+//                verifies()
+//            }
+//        }
 
         //Settle
 
@@ -157,7 +162,7 @@ class ContractTests {
 
     @Test
     fun iouMoneyTests() {
-        val iouToken = IOUToken(donor.party, null, 5 of tokenType issuedBy organization.party, 10.GBP issuedBy bank.party, UniqueIdentifier())
+        val iouToken = IOUToken(donor.party, Instant.now().plus(Duration.ofDays(7)), 5 of tokenType issuedBy organization.party, 10.GBP issuedBy bank.party, UniqueIdentifier())
         val iouMoney = IOUMoney(organization.party, donor.party, 10.GBP issuedBy bank.party)
 
         val cash1 = 7.GBP issuedBy bank.party heldBy organization.party

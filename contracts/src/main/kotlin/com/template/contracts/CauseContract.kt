@@ -89,10 +89,14 @@ class CauseContract : Contract {
                 val cashInputs = tx.inputsOfType<FungibleToken>()
                 val validCashInputs = cashInputs.filter{it.amount.token == currency && it.holder == cause.issuer}
                 "There must be valid input Cash states" using (validCashInputs.isNotEmpty())
+                val sumCashInput = validCashInputs.map{it.amount}.sumOrZero(currency)
 
-                val sumCash = validCashInputs.map{it.amount}.sumOrZero(currency)
-                "The sum of cash input states must match the nedded amount on the Cause state" using
-                        (sumCash == cause.neededAmount)
+                val cashOutputs = tx.outputsOfType<FungibleToken>()
+                val validCashOutputs = cashOutputs.filter{it.amount.token == currency && it.holder == cause.issuer}
+                val sumCashOutput = validCashOutputs.map{it.amount}.sumOrZero(currency)
+
+                "The sum of cash input states must match the needed amount on the Cause state" using
+                        (sumCashInput - sumCashOutput == cause.neededAmount)
 
                 "The cause issuer must sign the transaction" using
                         (command.signers.toSet() == cause.participants.map{it.owningKey}.toSet())

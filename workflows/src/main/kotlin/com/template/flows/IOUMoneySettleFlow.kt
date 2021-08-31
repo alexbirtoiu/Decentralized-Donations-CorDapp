@@ -2,6 +2,7 @@ package com.template.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.utilities.withoutIssuer
+import com.r3.corda.lib.tokens.selection.TokenQueryBy
 import com.r3.corda.lib.tokens.selection.database.selector.DatabaseTokenSelection
 import com.r3.corda.lib.tokens.workflows.flows.move.addMoveTokens
 import com.template.contracts.IOUMoneyContract
@@ -35,7 +36,7 @@ class IOUMoneySettleFlow(
             .addCommand(IOUMoneyContract.Commands.Settle(), iouMoney.participants.map{it.owningKey})
 
         val cashInputsOutputs = DatabaseTokenSelection(serviceHub)
-            .generateMove(listOf(Pair(iouMoney.lender, iouMoney.amount.withoutIssuer())), ourIdentity)
+            .generateMove(listOf(Pair(iouMoney.lender, iouMoney.amount.withoutIssuer())), ourIdentity, TokenQueryBy(iouMoney.amount.token.issuer))
 
         addMoveTokens(txBuilder, cashInputsOutputs.first, cashInputsOutputs.second)
 

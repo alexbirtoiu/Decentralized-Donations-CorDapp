@@ -16,4 +16,4 @@ class IOUMoney (
     override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : LinearState{
         override val participants = listOf(borrower, lender)
-    }
+}

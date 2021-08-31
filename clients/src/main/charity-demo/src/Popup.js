@@ -9,7 +9,7 @@ export default function Popup(props) {
     }
 
     return (
-        <Snackbar open={props.popup} autoHideDuration={3000} onClose={props.handlePopupClose}>
+        <Snackbar open={props.popup} autoHideDuration={5000} onClose={props.handlePopupClose}>
             <Alert onClose={props.handlePopupClose} severity={props.severity}>
                 {props.message}
             </Alert>

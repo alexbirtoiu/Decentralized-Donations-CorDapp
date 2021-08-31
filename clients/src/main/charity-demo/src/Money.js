@@ -1,12 +1,18 @@
-import React, {useState} from "react";
-import axios from "axios";
-
-const BACKEND_URL = "http://localhost:10050"
+import React from "react";
+import './App.css';
+import {Card, CardContent, Grid, Paper} from "@material-ui/core";
 
 export default function Money(props)  {
+
         return (
-            <div>
-                {props.money}
-            </div>
+            <>
+                {props.currencies.map((option) => (
+                    <Grid className="money-card">
+                        <h6 className="money-text">
+                        {props.money[option.value].toFixed(2) + " " + option.label}
+                        </h6>
+                    </Grid>
+                ))}
+            </>
         )
 }

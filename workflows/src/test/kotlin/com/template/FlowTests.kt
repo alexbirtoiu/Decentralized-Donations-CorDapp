@@ -15,6 +15,7 @@ import com.template.flows.*
 import com.template.states.Cause
 import com.template.states.IOUMoney
 import com.template.states.IOUToken
+import com.template.states.RewardToken
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -133,6 +134,16 @@ class FlowTests {
 //    }
 
     @Test
+    fun issueRewardTokens() {
+        val rewardToken = RewardToken(listOf(), 40 of tokenType issuedBy organizationParty heldBy organizationParty)
+        val issueTokens = IssueTokens(listOf(rewardToken))
+        val future1 = organization.startFlow(issueTokens)
+        mockNetwork.runNetwork()
+        val xd = future1.getOrThrow()
+        assert(xd.tx.outputsOfType<RewardToken>().single().amount.quantity == 40L)
+    }
+
+    @Test
     fun issueCauseFlow() {
         val cause = Cause("Project", "description", 200.GBP issuedBy bankParty, 40 of tokenType issuedBy organizationParty,  Instant.now().plus(
             Duration.ofDays(7)), Duration.ofMinutes(5))
@@ -174,6 +185,7 @@ class FlowTests {
         mockNetwork.runNetwork()
         val donate2 =future5.getOrThrow()
         val iou2 = donate2.tx.outputsOfType<IOUToken>().single()
+        println(iou2.amount)
 
         // The organization settles the cause and redeems the money from the ledger
         val settleCauseFlow = SettleCauseFlow(cause.linearId)
@@ -181,14 +193,21 @@ class FlowTests {
         mockNetwork.runNetwork()
         future6.getOrThrow()
 
-        // The organization creates
-        val tokens = 40 of tokenType issuedBy organizationParty
-        val issueTokensForCause = IssueFungibleTokenFlow(tokens.withoutIssuer(), organizationParty)
-        val future7 = organization.startFlow(issueTokensForCause)
-        future7.getOrThrow()
+        // The organization creates needed tokens for the cause
+//        val tokens = 40 of tokenType issuedBy organizationParty
+//        val issueTokensForCause = IssueFungibleTokenFlow(tokens.withoutIssuer(), organizationParty)
+//        val future7 = organization.startFlow(issueTokensForCause)
+//        future7.getOrThrow()
+
+        val rewardToken = RewardToken(listOf(), 40 of tokenType issuedBy organizationParty heldBy organizationParty)
+        val issueTokens = IssueTokens(listOf(rewardToken))
+        val future100 = organization.startFlow(issueTokens)
+        mockNetwork.runNetwork()
+        future100.getOrThrow()
+
 
         // Settle both of the IOUs created by the two donating flows
-        val settleIouTokenDonor = IOUTokenSettleFlow(iou1.linearId)
+        val settleIouTokenDonor = IOUTokenSettleFlow(listOf(), iou1.linearId)
         val future8 = organization.startFlow(settleIouTokenDonor)
         mockNetwork.runNetwork()
         future8.getOrThrow()
