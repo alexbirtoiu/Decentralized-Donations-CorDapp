@@ -53,7 +53,6 @@ const useStyles = makeStyles((theme) => ({
         width: '100%',
         margin: theme.spacing(3),
     },
-
     button: {
         color: "red",
         margin: theme.spacing(5, 1, 0, 0),
@@ -66,7 +65,6 @@ const useStyles = makeStyles((theme) => ({
         margin: theme.spacing(3, 1, 2, 0),
         background: "white"
     },
-
     description: {
         margin: theme.spacing(3, 1, 0, 0),
     },
