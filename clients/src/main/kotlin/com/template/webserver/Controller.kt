@@ -23,7 +23,6 @@ import net.corda.core.node.services.AttachmentId
 import net.corda.core.node.services.Vault
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.utilities.getOrThrow
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
@@ -49,11 +48,7 @@ import java.util.zip.ZipOutputStream
 @RestController
 @RequestMapping("/") // The paths for HTTP requests are relative to this base path.
 @CrossOrigin(origins = ["http://localhost:3000"]) // The paths for HTTP requests are relative to this base path.
-class Controller(rpc: NodeRPCConnection) {
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(RestController::class.java)
-    }
+class Controller() {
 
     @Autowired
     lateinit var partyAProxy: CordaRPCOps
@@ -468,7 +463,7 @@ class Controller(rpc: NodeRPCConnection) {
     private fun settleTokens(@RequestParam("causeId") causeId : String,
                               @RequestParam("file") file: MultipartFile) : ResponseEntity<String> {
 
-        var attachmentId = uploadFile(file)
+        val attachmentId = uploadFile(file)
         val proof = listOf(attachmentId)
 
         getGroups("owed").filter { it.key == fromString(causeId) }.map{it.value}.single().forEach {

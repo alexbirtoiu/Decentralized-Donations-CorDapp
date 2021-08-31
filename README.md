@@ -47,7 +47,7 @@ npm install
 npm start
 ```
 
-The command should start the browser on the correct link automatically. If it doesn't go to [localhost:3000](http://localhost:3000)
+The command should start the browser on the correct link automatically. If it doesn't go to [localhost:3000](http://localhost:3000).
 
 
 
