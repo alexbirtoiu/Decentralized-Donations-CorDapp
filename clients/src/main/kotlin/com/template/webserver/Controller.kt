@@ -49,7 +49,6 @@ import java.util.zip.ZipOutputStream
 @RequestMapping("/") // The paths for HTTP requests are relative to this base path.
 @CrossOrigin(origins = ["http://localhost:3000"]) // The paths for HTTP requests are relative to this base path.
 class Controller() {
-
     @Autowired
     lateinit var partyAProxy: CordaRPCOps
 
@@ -66,13 +65,13 @@ class Controller() {
     @Qualifier("partyAProxy")
     lateinit var proxy: CordaRPCOps
 
-    private var reliability = mapOf("PartyA" to "green", "PartyB" to "green", "PartyC" to "green")
-
     private val tokenExpiryDuration = Duration.ofMinutes(1)
 
     private val currencyCodes = listOf("GBP", "EUR", "USD")
 
     private val currencies = currencyCodes.map{it to getCurrency(it)}
+
+    private var reliability = mapOf("PartyA" to "green", "PartyB" to "green", "PartyC" to "green")
 
     private fun isNotary(nodeInfo: NodeInfo)
         = proxy.notaryIdentities().any { nodeInfo.isLegalIdentity(it) }
@@ -194,7 +193,7 @@ class Controller() {
 
     private fun getImgFromHash(hash : String) : String {
         val zipStream = ZipInputStream(proxy.openAttachment(SecureHash.parse(hash)))
-        var entry: ZipEntry = zipStream.nextEntry
+        val entry = zipStream.nextEntry
 
         while (zipStream.available() > 0)
             zipStream.read()
@@ -227,11 +226,6 @@ class Controller() {
             res.add(obj)
         }
         return res.toString()
-    }
-
-    @GetMapping(value = ["/templateendpoint"], produces = ["text/plain"])
-    private fun templateendpoint(): String {
-        return "Define an endpoint here."
     }
 
     @GetMapping(value = ["/node"])

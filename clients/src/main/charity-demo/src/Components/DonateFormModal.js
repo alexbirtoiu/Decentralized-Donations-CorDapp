@@ -1,7 +1,7 @@
 import FormControl from "@material-ui/core/FormControl";
-import {Button, createTheme, Grid, Modal, Paper, TextField} from "@material-ui/core";
+import { Grid, Modal, TextField} from "@material-ui/core";
 import React from "react";
-import './App.css';
+import '../App.css';
 import {ThemeProvider} from "react-bootstrap";
 
 
@@ -35,9 +35,6 @@ export default function DonateFormModal(props) {
                         <button
                             className="form-button"
                             type="submit"
-                            InputProps={{
-                                className: props.classes.buttonColor
-                            }}
                         >
                             Donate!
                         </button>

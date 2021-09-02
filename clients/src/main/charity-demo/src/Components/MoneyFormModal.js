@@ -1,8 +1,7 @@
 import React from "react";
 import FormControl from "@material-ui/core/FormControl";
-import {Button, Grid, Modal, TextField} from "@material-ui/core";
+import { Grid, Modal, TextField} from "@material-ui/core";
 import MenuItem from "@material-ui/core/MenuItem";
-import {makeStyles} from "@material-ui/core/styles";
 import {ThemeProvider} from "react-bootstrap";
 
 export default function MoneyFormModal(props) {
@@ -67,7 +66,6 @@ export default function MoneyFormModal(props) {
                             <button
                                 className="form-button"
                                 type="submit"
-                                variant="outlined"
                                 color="primary"
                             >
                                 Issue Money!

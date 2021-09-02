@@ -1,32 +1,20 @@
 import './App.css';
 import React, {useEffect, useState} from "react";
-import InputLabel from '@material-ui/core/InputLabel';
 import { makeStyles } from '@material-ui/core/styles';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import axios from 'axios'
-import Popup from './Popup'
-import Money from './Money'
-import {
-    Button,
-    Card,
-    CardMedia,
-    colors,
-    Container,
-    createTheme,
-    Label,
-    Paper,
-    TextField,
-    Typography
-} from "@material-ui/core";
+import Popup from './Components/Popup'
+import Money from './Components/Money'
+import { BACKEND_URL } from './Components/CONSTANTS'
+import { Button, Card, CardMedia, createTheme, Typography } from "@material-ui/core";
 import Carousel from 'react-material-ui-carousel'
-import MoneyFormModal from "./MoneyFormModal";
-import CauseFormModal from "./CauseFormModal";
-import DonateFormModal from "./DonateFormModal";
+import MoneyFormModal from "./Components/MoneyFormModal";
+import CauseFormModal from "./Components/CauseFormModal";
+import DonateFormModal from "./Components/DonateFormModal";
 import Countdown from "react-countdown";
-import ProofModal from "./ProofModal";
-import {green, red} from "@material-ui/core/colors";
-const BACKEND_URL = "http://localhost:10050"
+import ProofModal from "./Components/ProofModal";
+import { red } from "@material-ui/core/colors";
 
 const theme = createTheme({
     palette: {
@@ -127,8 +115,6 @@ function App() {
     const [rewardTokens, setRewardTokens] = useState([])
     const [incomingTokens, setIncomingTokens] = useState([])
     const [iouMoney, setIouMoney] = useState([])
-
-    const [images, setImages] = useState([])
 
     const [money, setMoney] = useState({
         GBP: 0.00,
@@ -345,8 +331,6 @@ function App() {
             ...donateForm,
             ["cause"]: cause
         })
-
-        console.log(donateForm.cause)
     }
 
     const donateModalClose = () => {
@@ -436,7 +420,6 @@ function App() {
     const openProofModal = (event, causeId) => {
         event.preventDefault()
         showProofModal(true)
-        console.log(causeId)
 
         setProofForm({
             ...proofForm,
@@ -494,7 +477,7 @@ function App() {
                     setMessage(err.response.data)
                 }
                 else {
-                    setMessage("Connection Failed " + urlExtension)
+                    setMessage("Connection Failed ")
                 }
                 setPopup(true)
                 setSeverity('error')
@@ -506,22 +489,27 @@ function App() {
             <nav className="navbar">
                     <img
                         className="corda-logo"
-                        src = "corda-logo.png">
+                        src = "corda-logo.png"
+                        alt="Corda logo">
                     </img>
+
                     <h2 className="demo-title">
                         Decentralized Donations Demo
                     </h2>
+
                     <Money
                         classname="moneycards"
                         money = {money}
                         currencies = {currencies}>
                     </Money>
+
                     <button
                         className="navbar-button"
                         type="button"
                         onClick={openCauseModal}>
                         Issue Cause
                     </button>
+
                     <button
                         className="navbar-button"
                         type="button"
@@ -530,27 +518,28 @@ function App() {
                     </button>
 
                     <div className="party-selector-part">
-                    <h5
-                        className="party-selector-label"
-                    >
-                    Current Party
-                    </h5>
-                    <Select
-                        className={classes.selector}
-                        labelId="select-label"
-                        id="select"
-                        fullWidth
-                        open={open}
-                        onClose={partyHandleClose}
-                        onOpen={partyHandleOpen}
-                        value={party}
-                        onChange={chooseParty}
-                    >
-                        <MenuItem value={'PartyA'}>PartyA</MenuItem>
-                        <MenuItem value={'PartyB'}>PartyB</MenuItem>
-                        <MenuItem value={'PartyC'}>PartyC</MenuItem>
-                        <MenuItem value={'Bank'}>Bank</MenuItem>
-                    </Select>
+                        <h5
+                            className="party-selector-label"
+                        >
+                        Current Party
+                        </h5>
+
+                        <Select
+                            className={classes.selector}
+                            labelId="select-label"
+                            id="select"
+                            fullWidth
+                            open={open}
+                            onClose={partyHandleClose}
+                            onOpen={partyHandleOpen}
+                            value={party}
+                            onChange={chooseParty}
+                        >
+                            <MenuItem value={'PartyA'}>PartyA</MenuItem>
+                            <MenuItem value={'PartyB'}>PartyB</MenuItem>
+                            <MenuItem value={'PartyC'}>PartyC</MenuItem>
+                            <MenuItem value={'Bank'}>Bank</MenuItem>
+                        </Select>
                     </div>
             </nav>
 
@@ -600,64 +589,17 @@ function App() {
             proofFormChange = {proofFormChange}
         />
 
-        <div className='cards'>
-            <div className='cards_container'>
-                <ul className='cards-row'>
-                    <div className='big_card'>
+            <div className='cards'>
+                <div className='cards_container'>
+                    <ul className='cards-row'>
+                        <div className='big_card'>
 
-                    <h5 className='card-header'>
-                        My Causes
-                    </h5>
-
-                    <Carousel>
-                        {myCauses.map((cause, i) => (
-                            <Card
-                                className='card'
-                                key = {i}>
-                                <h2 className={classes.text}>
-                                    {cause.name}
-                                </h2>
-
-                                <h6 className={classes.text}>
-                                    {cause.description}
-                                </h6>
-
-                                <Typography className={classes.text}>
-                                    Amount needed: {cause.neededAmount.toFixed(2)} {cause.currency}
-                                </Typography>
-
-                                <Typography className={classes.text}>
-                                    Amount gathered: {cause.gatheredAmount.toFixed(2)} {cause.currency}
-                                </Typography>
-
-                                <Countdown
-                                    className='countdown'
-                                    date={Date.parse(cause.timeLimit)}
-                                />
-
-                                <Button
-                                    classname={classes.cardButton}
-                                    theme = {theme}
-                                    color = "secondary"
-                                    type="button"
-                                    variant="outlined"
-                                    disabled = {!(cause.gatheredAmount === cause.neededAmount)}
-                                    onClick = {(e) => settleCause(e, cause)}
-                                    >
-                                    Settle cause
-                                </Button>
-                            </Card>
-                        ))}
-                    </Carousel>
-                    </div>
-
-                    <div className='big_card'>
                         <h5 className='card-header'>
-                            Active Causes
+                            My Causes
                         </h5>
 
                         <Carousel>
-                            {activeCauses.map((cause, i) => (
+                            {myCauses.map((cause, i) => (
                                 <Card
                                     className='card'
                                     key = {i}>
@@ -666,7 +608,7 @@ function App() {
                                     </h2>
 
                                     <h6 className={classes.text}>
-                                       {cause.description}
+                                        {cause.description}
                                     </h6>
 
                                     <Typography className={classes.text}>
@@ -677,166 +619,214 @@ function App() {
                                         Amount gathered: {cause.gatheredAmount.toFixed(2)} {cause.currency}
                                     </Typography>
 
-                                    <Typography
-                                        className={"party"+cause.reliability}>
-                                        Issued by {cause.party}
-                                    </Typography>
-
                                     <Countdown
                                         className='countdown'
                                         date={Date.parse(cause.timeLimit)}
                                     />
 
-                                    <Button className={classes.cardButton}
-                                            theme = {theme}
-                                            color = "secondary"
-                                            type="button"
-                                            variant="outlined"
-                                            disabled = {(cause.gatheredAmount === cause.neededAmount)}
-                                            onClick = {(e) => openDonateModal(e, cause)} >
-                                        Donate To cause
+                                    <Button
+                                        classname={classes.cardButton}
+                                        theme = {theme}
+                                        color = "secondary"
+                                        type="button"
+                                        variant="outlined"
+                                        disabled = {!(cause.gatheredAmount === cause.neededAmount)}
+                                        onClick = {(e) => settleCause(e, cause)}
+                                        >
+                                        Settle cause
                                     </Button>
                                 </Card>
                             ))}
                         </Carousel>
-                    </div>
+                        </div>
 
-                    <div className='big_card'>
-                        <h5 className='card-header'>
-                            IOUMoney
-                        </h5>
-                        <Carousel>
-                            {iouMoney.map((it, i) => (
-                                <Card
-                                    className='card'
-                                    key = {i}>
+                        <div className='big_card'>
+                            <h5 className='card-header'>
+                                Active Causes
+                            </h5>
 
-                                    <h4 className={classes.warning}>
-                                        You owe {it.amount} {it.currency} to {it.lender}
-                                    </h4>
+                            <Carousel>
+                                {activeCauses.map((cause, i) => (
+                                    <Card
+                                        className='card'
+                                        key = {i}>
+                                        <h2 className={classes.text}>
+                                            {cause.name}
+                                        </h2>
 
-                                    <Button className={classes.cardButton}
-                                            theme = {theme}
-                                            color = "secondary"
-                                            type="button"
-                                            variant="outlined"
-                                            onClick = {(e) => repay(e, it.linearId)} >
-                                        Return money
-                                    </Button>
-                                </Card>
-                            ))}
-                        </Carousel>
-                    </div>
-                </ul>
-                <ul className='cards-row'>
-                    <div className='big_card'>
-                        <h5 className='card-header'>
-                            Owed Tokens
-                        </h5>
-                        <Carousel>
-                            {owedTokens.map((owedToken, i) => (
-                                <Card
-                                    className='card'
-                                    key = {i}>
+                                        <h6 className={classes.text}>
+                                           {cause.description}
+                                        </h6>
 
-                                    <h2 className={classes.text}>
-                                        {owedToken.name}
-                                    </h2>
+                                        <Typography className={classes.text}>
+                                            Amount needed: {cause.neededAmount.toFixed(2)} {cause.currency}
+                                        </Typography>
 
-                                    <h6 className={classes.text}>
-                                        {owedToken.description}
-                                    </h6>
+                                        <Typography className={classes.text}>
+                                            Amount gathered: {cause.gatheredAmount.toFixed(2)} {cause.currency}
+                                        </Typography>
 
-                                    <Typography className={classes.text}>
-                                        Amount of owed tokens: {owedToken.amount.toFixed(2)} {owedToken.token}
-                                    </Typography>
+                                        <Typography
+                                            className={"party"+cause.reliability}>
+                                            Issued by {cause.party}
+                                        </Typography>
 
-                                    <Countdown
-                                        className='countdown'
-                                        date={Date.parse(owedToken.expirationDate)}
-                                    />
+                                        <Countdown
+                                            className='countdown'
+                                            date={Date.parse(cause.timeLimit)}
+                                        />
 
-                                    <Button className={classes.cardButton}
-                                            theme = {theme}
-                                            color = "secondary"
-                                            type="button"
-                                            variant="outlined"
-                                            disabled = {owedToken.show}
-                                            onClick = {(e) => openProofModal(e, owedToken.causeId)} >
-                                        Upload proof
-                                    </Button>
-                                </Card>
-                            ))}
-                        </Carousel>
-                    </div>
+                                        <Button className={classes.cardButton}
+                                                theme = {theme}
+                                                color = "secondary"
+                                                type="button"
+                                                variant="outlined"
+                                                disabled = {(cause.gatheredAmount === cause.neededAmount)}
+                                                onClick = {(e) => openDonateModal(e, cause)} >
+                                            Donate To cause
+                                        </Button>
+                                    </Card>
+                                ))}
+                            </Carousel>
+                        </div>
 
-                    <div className='big_card'>
-                        <h5 className='card-header'>
-                            Incoming Tokens
-                        </h5>
-                        <Carousel>
-                            {incomingTokens.map((incomingToken, i) => (
-                                <Card
-                                    className='card'
-                                    key = {i}>
+                        <div className='big_card'>
+                            <h5 className='card-header'>
+                                IOUMoney
+                            </h5>
+                            <Carousel>
+                                {iouMoney.map((it, i) => (
+                                    <Card
+                                        className='card'
+                                        key = {i}>
 
-                                    <Typography className={classes.text}>
-                                        Amount of incoming tokens: {incomingToken.amount.toFixed(2)} {incomingToken.token}
-                                    </Typography>
+                                        <h4 className={classes.warning}>
+                                            You owe {it.amount} {it.currency} to {it.lender}
+                                        </h4>
 
-                                    <Typography className={classes.text}>
-                                        Donated amount: {incomingToken.donatedAmount.toFixed(2)} {incomingToken.currency}
-                                    </Typography>
+                                        <Button className={classes.cardButton}
+                                                theme = {theme}
+                                                color = "secondary"
+                                                type="button"
+                                                variant="outlined"
+                                                onClick = {(e) => repay(e, it.linearId)} >
+                                            Return money
+                                        </Button>
+                                    </Card>
+                                ))}
+                            </Carousel>
+                        </div>
+                    </ul>
 
-                                    <Countdown
-                                        className='countdown'
-                                        date = {Date.parse(incomingToken.expirationDate)}
-                                    />
+                    <ul className='cards-row'>
+                        <div className='big_card'>
+                            <h5 className='card-header'>
+                                Owed Tokens
+                            </h5>
+                            <Carousel>
+                                {owedTokens.map((owedToken, i) => (
+                                    <Card
+                                        className='card'
+                                        key = {i}>
 
-                                    <Button className={classes.cardButton}
-                                            theme = {theme}
-                                            color = "secondary"
-                                            type="button"
-                                            variant="outlined"
-                                            disabled = {
-                                                new Date(Date.parse(incomingToken.expirationDate)).getTime()
-                                                > (new Date()).getTime()
-                                            }
-                                            onClick = {(e) => requestMoney(e, incomingToken.causeId)} >
-                                        Request Money
-                                    </Button>
-                                </Card>
-                            ))}
-                        </Carousel>
-                    </div>
+                                        <h2 className={classes.text}>
+                                            {owedToken.name}
+                                        </h2>
 
-                    <div className='big_card'>
-                        <h5 className='card-header'>
-                            Reward Tokens
-                        </h5>
-                        <Carousel>
-                            {rewardTokens.map((rewardToken, i) => (
-                                <Card
-                                    className='card'
-                                    key = {i}>
+                                        <h6 className={classes.text}>
+                                            {owedToken.description}
+                                        </h6>
 
-                                    <CardMedia
-                                        className = {classes.media}
-                                        image = {process.env.PUBLIC_URL + "/images/" + rewardToken.image}>
-                                    </CardMedia>
+                                        <Typography className={classes.text}>
+                                            Amount of owed tokens: {owedToken.amount.toFixed(2)} {owedToken.token}
+                                        </Typography>
 
-                                    <h6 className={classes.text}>
-                                        {rewardToken.amount.toFixed(2)} {rewardToken.token}
-                                    </h6>
+                                        <Countdown
+                                            className='countdown'
+                                            date={Date.parse(owedToken.expirationDate)}
+                                        />
 
-                                </Card>
-                            ))}
-                        </Carousel>
+                                        <Button className={classes.cardButton}
+                                                theme = {theme}
+                                                color = "secondary"
+                                                type="button"
+                                                variant="outlined"
+                                                disabled = {owedToken.show}
+                                                onClick = {(e) => openProofModal(e, owedToken.causeId)} >
+                                            Upload proof
+                                        </Button>
+                                    </Card>
+                                ))}
+                            </Carousel>
+                        </div>
 
-                    </div>
-                </ul>
+                        <div className='big_card'>
+                            <h5 className='card-header'>
+                                Incoming Tokens
+                            </h5>
+                            <Carousel>
+                                {incomingTokens.map((incomingToken, i) => (
+                                    <Card
+                                        className='card'
+                                        key = {i}>
+
+                                        <Typography className={classes.text}>
+                                            Amount of incoming tokens: {incomingToken.amount.toFixed(2)} {incomingToken.token}
+                                        </Typography>
+
+                                        <Typography className={classes.text}>
+                                            Donated amount: {incomingToken.donatedAmount.toFixed(2)} {incomingToken.currency}
+                                        </Typography>
+
+                                        <Countdown
+                                            className='countdown'
+                                            date = {Date.parse(incomingToken.expirationDate)}
+                                        />
+
+                                        <Button className={classes.cardButton}
+                                                theme = {theme}
+                                                color = "secondary"
+                                                type="button"
+                                                variant="outlined"
+                                                disabled = {
+                                                    new Date(Date.parse(incomingToken.expirationDate)).getTime()
+                                                    > (new Date()).getTime()
+                                                }
+                                                onClick = {(e) => requestMoney(e, incomingToken.causeId)} >
+                                            Request Money
+                                        </Button>
+                                    </Card>
+                                ))}
+                            </Carousel>
+                        </div>
+
+                        <div className='big_card'>
+                            <h5 className='card-header'>
+                                Reward Tokens
+                            </h5>
+                            <Carousel>
+                                {rewardTokens.map((rewardToken, i) => (
+                                    <Card
+                                        className='card'
+                                        key = {i}>
+
+                                        <CardMedia
+                                            className = {classes.media}
+                                            image = {process.env.PUBLIC_URL + "/images/" + rewardToken.image}>
+                                        </CardMedia>
+
+                                        <h6 className={classes.text}>
+                                            {rewardToken.amount.toFixed(2)} {rewardToken.token}
+                                        </h6>
+
+                                    </Card>
+                                ))}
+                            </Carousel>
+
+                        </div>
+                    </ul>
+                </div>
             </div>
-        </div>
         </div>
     );
 }

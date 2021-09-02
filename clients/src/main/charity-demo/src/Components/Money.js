@@ -1,6 +1,6 @@
 import React from "react";
-import './App.css';
-import {Card, CardContent, Grid, Paper} from "@material-ui/core";
+import '../App.css';
+import {Grid} from "@material-ui/core";
 
 export default function Money(props)  {
 
